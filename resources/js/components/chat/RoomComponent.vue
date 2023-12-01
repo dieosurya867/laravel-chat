@@ -21,7 +21,9 @@
 
                     <div class="card-footer">
                         <div class="form-group">
-                            <input type="text" name="" id="" class="form-control">
+                            <input type="text" class="form-control"
+                            v-model="message"
+                            @keyup.enter="sendMessage()">
                         </div>
                         <p class="text-muted">Username typing...</p>
                     </div>
@@ -47,6 +49,40 @@
 
 <script>
 export default {
+    data() {
+        return {
+            message: '',
+            messages: [],
+        }
+    },
+
+    props: {
+        user: Object
+    },
+
+    methods: {
+        sendMessage() {
+            this.messages.push({
+                user: this.user,
+                message: this.message,
+            })
+
+            axios.post('/send', {
+                message: this.message,
+            })
+            .then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.log(err);
+            });
+
+            this.message = '';
+
+            // console.log(this.message);
+        }
+    },
+
+
     mounted() {
         Echo.join('chat')
             .listen('ChatSent', (e) => {
