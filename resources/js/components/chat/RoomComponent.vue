@@ -44,3 +44,14 @@
         </div>
     </div>
 </template>
+
+<script>
+export default {
+    mounted() {
+        Echo.join('chat')
+            .listen('ChatSent', (e) => {
+                console.log(e);
+            });
+    },
+}
+</script>
