@@ -7,23 +7,19 @@
                     <div class="card-header">Chat Room</div>
 
                     <div id="chat-box" class="card-body bg-secondary">
-                        <div class="media bg-light rounded">
+                        <div class="media m-2 bg-light rounded" v-for="(chat, index) in messages" :key="index">
                             <div class="media-body m-2">
                                 <h5 class="mt-0">
-                                    Username
+                                    {{ chat . user . name }}
                                 </h5>
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae vitae doloremque
-                                autem nobis nisi tempora ipsum eaque. Molestias amet sint totam nihil eius quo voluptas
-                                officia, eligendi, tempora, quas debitis.
+                                {{ chat . message }}
                             </div>
                         </div>
                     </div>
 
                     <div class="card-footer">
                         <div class="form-group">
-                            <input type="text" class="form-control"
-                            v-model="message"
-                            @keyup.enter="sendMessage()">
+                            <input type="text" class="form-control" v-model="message" @keyup.enter="sendMessage()">
                         </div>
                         <p class="text-muted">Username typing...</p>
                     </div>
@@ -48,46 +44,57 @@
 </template>
 
 <script>
-export default {
-    data() {
-        return {
-            message: '',
-            messages: [],
-        }
-    },
+    export default {
+        data() {
+            return {
+                message: '',
+                messages: [],
+            }
+        },
 
-    props: {
-        user: Object
-    },
+        props: {
+            user: Object
+        },
 
-    methods: {
-        sendMessage() {
-            this.messages.push({
-                user: this.user,
-                message: this.message,
-            })
+        methods: {
+            fetchMessages() {
+                axios.get('/fetch').then((result) => {
+                    this.messages = result.data;
+                    console.log(result.data);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
 
-            axios.post('/send', {
-                message: this.message,
-            })
-            .then((result) => {
-                console.log(result);
-            }).catch((err) => {
-                console.log(err);
-            });
+            sendMessage() {
+                this.messages.push({
+                    user: this.user,
+                    message: this.message,
+                })
 
-            this.message = '';
+                axios.post('/send', {
+                        message: this.message,
+                    })
+                    .then((result) => {
+                        console.log(result);
+                    }).catch((err) => {
+                        console.log(err);
+                    });
 
-            // console.log(this.message);
-        }
-    },
+                this.message = '';
+
+                // console.log(this.message);
+            }
+        },
 
 
-    mounted() {
-        Echo.join('chat')
-            .listen('ChatSent', (e) => {
-                console.log(e);
-            });
-    },
-}
+        mounted() {
+            this.fetchMessages();
+
+            Echo.join('chat')
+                .listen('ChatSent', (e) => {
+                    console.log(e);
+                });
+        },
+    }
 </script>
